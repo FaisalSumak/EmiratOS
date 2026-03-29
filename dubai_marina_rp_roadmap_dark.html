@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dubai Marina RP — Development Roadmap</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0e0f11;
+  --surface: #16181c;
+  --surface-2: #1e2127;
+  --border: #2a2d35;
+  --border-hover: #3e4250;
+  --text-primary: #e8e9ec;
+  --text-secondary: #7a7f8e;
+  --text-muted: #4a4f5e;
+
+  --civic-bg: #0d1e30;
+  --civic-color: #4a9ede;
+  --commercial-bg: #1a1030;
+  --commercial-color: #9b8ef0;
+  --residential-bg: #0d2419;
+  --residential-color: #3fb87a;
+  --underground-bg: #2a1010;
+  --underground-color: #e06060;
+
+  --phase1-bg: #152a0a;
+  --phase1-color: #6dba2d;
+  --phase2-bg: #0d1e30;
+  --phase2-color: #4a9ede;
+  --phase3-bg: #1e1e1e;
+  --phase3-color: #8a8a8a;
+
+  --done-bg: #0f1f0f;
+  --done-border: #2a4a2a;
+  --done-text: #3a5a3a;
+  --done-tag: #1e3a1e;
+}
+
+body {
+  font-family: 'Syne', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  padding: 2.5rem 2rem;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(74,158,222,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(155,142,240,0.04) 0%, transparent 60%);
+}
+
+h1 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  letter-spacing: 0.01em;
+}
+
+/* Summary bar */
+.summary-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 1.75rem;
+}
+.stat {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.stat-num {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+.stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+.stat.done-stat .stat-num { color: var(--residential-color); }
+
+/* Filter bar */
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+  align-items: center;
+}
+.filter-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+}
+.filter-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+.filter-btn.active { background: var(--surface-2); color: var(--text-primary); border-color: var(--border-hover); }
+.filter-btn.done-btn.active { background: var(--done-bg); color: var(--residential-color); border-color: var(--done-border); }
+
+/* Tier */
+.tier { margin-bottom: 2.5rem; }
+.tier-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.tier-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+.tier-subtitle {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* Grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 15px;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.card:hover { border-color: var(--border-hover); }
+.card.expanded { border-color: #3e4250; }
+
+/* Done state */
+.card.done {
+  background: var(--done-bg);
+  border-color: var(--done-border);
+}
+.card.done .card-name { color: var(--done-text); text-decoration: line-through; }
+.card.done .card-original { color: #2a3a2a; }
+.card.done .card-tag { filter: saturate(0.2) brightness(0.5); }
+.card.done .expand-icon { opacity: 0.3; }
+.card.done .req-list li { color: var(--done-text); }
+.card.done::after {
+  content: '✓';
+  position: absolute;
+  top: 12px;
+  right: 38px;
+  font-size: 13px;
+  color: var(--residential-color);
+  opacity: 0.8;
+}
+
+/* Card internals */
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.card-names { flex: 1; }
+.card-original {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  letter-spacing: 0.03em;
+}
+.card-name { font-size: 13px; font-weight: 500; color: var(--text-primary); letter-spacing: -0.01em; }
+.card-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  margin-top: 5px;
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+
+.card-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.expand-icon {
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+}
+.done-toggle {
+  font-size: 11px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 0.5px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.done-toggle:hover { border-color: var(--residential-color); color: var(--residential-color); }
+.card.done .done-toggle {
+  border-color: var(--residential-color);
+  color: var(--residential-color);
+  background: rgba(63, 184, 122, 0.1);
+}
+
+/* Details */
+.card-details {
+  margin-top: 11px;
+  padding-top: 11px;
+  border-top: 0.5px solid var(--border);
+  display: none;
+}
+.card.expanded .card-details { display: block; }
+.req-list { list-style: none; }
+.req-list li {
+  font-family: 'DM Mono', monospace;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  padding: 3px 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  letter-spacing: 0.01em;
+}
+.req-list li::before { content: '—'; color: var(--text-muted); flex-shrink: 0; }
+
+/* Progress bar at top */
+.progress-wrap {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.progress-bar-bg {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--residential-color);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  min-width: 0;
+}
+.progress-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Empty state */
+.empty { 
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 2rem;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<h1>Dubai Marina RP — Development Roadmap</h1>
+<p class="subtitle">click to expand · click ✓ button to mark complete · filter by phase or category</p>
+
+<div class="summary-bar">
+  <div class="stat"><div class="stat-num">47</div><div class="stat-label">total locations</div></div>
+  <div class="stat"><div class="stat-num">12</div><div class="stat-label">phase 1 — core</div></div>
+  <div class="stat"><div class="stat-num">18</div><div class="stat-label">phase 2 — economy</div></div>
+  <div class="stat"><div class="stat-num">17</div><div class="stat-label">phase 3 — world</div></div>
+  <div class="stat done-stat"><div class="stat-num" id="done-count">0</div><div class="stat-label">completed</div></div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="progress-label" id="progress-label">0 / 47</div>
+</div>
+
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="filterCards('all', this)">All</button>
+  <button class="filter-btn" onclick="filterCards('phase1', this)">Phase 1</button>
+  <button class="filter-btn" onclick="filterCards('phase2', this)">Phase 2</button>
+  <button class="filter-btn" onclick="filterCards('phase3', this)">Phase 3</button>
+  <button class="filter-btn" onclick="filterCards('civic', this)">Civic</button>
+  <button class="filter-btn" onclick="filterCards('commercial', this)">Commercial</button>
+  <button class="filter-btn" onclick="filterCards('residential', this)">Residential</button>
+  <button class="filter-btn" onclick="filterCards('underground', this)">Underground</button>
+  <button class="filter-btn done-btn" onclick="filterCards('done', this)">Completed</button>
+</div>
+
+<div id="cards-container"></div>
+
+<script>
+const locations = [
+  { id: 1, original: "LPD", name: "Dubai Marina Police Post", phase: "phase1", cat: "civic", tag: "Law Enforcement", reqs: ["Front desk with officer spawn point", "Detention holding cells (2–3)", "Armory / equipment locker", "Briefing room", "Parking bay for police vehicles", "Exterior: Dubai Police branding, green/white"] },
+  { id: 2, original: "Sheriff", name: "Dubai Municipality Patrol", phase: "phase1", cat: "civic", tag: "Law Enforcement", reqs: ["Small patrol office", "Vehicle dispatch area", "Desk for issuing fines / violations", "Exterior signage in Arabic + English"] },
+  { id: 3, original: "Prison", name: "Dubai Central Jail", phase: "phase1", cat: "civic", tag: "Detention", reqs: ["Intake / processing area", "Cell block (6–8 cells)", "Guard station", "Visitation room", "Outdoor yard / exercise area", "Secure perimeter wall"] },
+  { id: 4, original: "PrisonCJ", name: "Detention Processing Centre", phase: "phase1", cat: "civic", tag: "Detention", reqs: ["Booking desk", "Fingerprint / ID room", "Holding area (temporary)", "Link corridor to main jail"] },
+  { id: 5, original: "NGZone", name: "UAE Armed Forces Restricted Zone", phase: "phase2", cat: "civic", tag: "Military", reqs: ["Perimeter fence with checkpoint gate", "Barracks building", "Vehicle depot", "Restricted signage (Arabic/English)", "No civilian access — roleplay zone boundary"] },
+  { id: 6, original: "NGHQ", name: "Presidential Guard HQ", phase: "phase2", cat: "civic", tag: "Military", reqs: ["Formal entrance with guard post", "Command room / briefing area", "Officer offices", "Exterior: UAE Armed Forces branding", "Flag pole + ceremonial plaza"] },
+  { id: 7, original: "NGWP", name: "Military Checkpoint — Marina Entry", phase: "phase2", cat: "civic", tag: "Military", reqs: ["Barrier gate (raises/lowers)", "Guard booth", "ID check interaction point", "Connects restricted zone to civilian map"] },
+  { id: 8, original: "Hospital", name: "Mediclinic Marina", phase: "phase1", cat: "civic", tag: "Medical", reqs: ["Reception / waiting area", "Emergency bay (2–3 beds)", "Doctor office", "Pharmacy counter inside", "Ambulance bay exterior", "Mediclinic branding"] },
+  { id: 9, original: "ED", name: "Emergency Clinic", phase: "phase1", cat: "civic", tag: "Medical", reqs: ["Trauma beds (2)", "Triage desk", "Small separate entrance from main hospital or standalone unit"] },
+  { id: 10, original: "FireStation", name: "Civil Defence Station", phase: "phase2", cat: "civic", tag: "Emergency", reqs: ["Fire truck bay (2 vehicles)", "Gear locker room", "Watch room / control desk", "Exterior: UAE Civil Defence red/white branding"] },
+  { id: 11, original: "PollingStation", name: "Federal Election Centre", phase: "phase3", cat: "civic", tag: "Government", reqs: ["Voting booths (4–6)", "Registration desk", "Ballot box", "Signage in Arabic + English"] },
+  { id: 12, original: "MSPB", name: "Dubai Marina Yacht Club", phase: "phase2", cat: "civic", tag: "Maritime", reqs: ["Marina dock with moored boats", "Club reception / lounge", "Harbormaster office", "Outdoor terrace overlooking water"] },
+  { id: 13, original: "MPBS", name: "Port Authority Office", phase: "phase3", cat: "civic", tag: "Maritime", reqs: ["Admin office", "Cargo manifest / customs desk", "Small dock access point"] },
+  { id: 14, original: "Bank", name: "Emirates NBD Marina Branch", phase: "phase1", cat: "commercial", tag: "Finance", reqs: ["ATM machines (exterior)", "Teller counters (2–3)", "Vault room (robbable)", "Manager office", "Security guard post", "Waiting area with chairs"] },
+  { id: 15, original: "GunStore", name: "Black Market Underground", phase: "phase2", cat: "underground", tag: "Illegal", reqs: ["Hidden entrance (disguised as civilian building)", "Weapons display / trade area", "NPC dealer", "Escape route / back exit", "No exterior signage — discovery-based"] },
+  { id: 16, original: "Pharmacy", name: "Aster Pharmacy", phase: "phase1", cat: "commercial", tag: "Medical", reqs: ["Counter with pharmacist NPC", "Medicine shelves (purchasable items)", "Aster branding exterior"] },
+  { id: 17, original: "Laboratory", name: "Police Forensics Lab", phase: "phase3", cat: "civic", tag: "Law Enforcement", reqs: ["Lab benches with equipment", "Evidence locker", "Connected to or inside police post", "Restricted access"] },
+  { id: 18, original: "Office", name: "Marina Plaza Business Tower", phase: "phase3", cat: "commercial", tag: "Business", reqs: ["Lobby with reception", "Open plan office floor", "Board room", "Elevator (functional or decorative)", "Rooftop access"] },
+  { id: 19, original: "WestEnterprise", name: "DAMAC Sales Office", phase: "phase3", cat: "commercial", tag: "Business", reqs: ["Sales floor with property displays", "Meeting rooms", "Reception desk", "DAMAC/Emaar branding"] },
+  { id: 20, original: "LanderTerminal", name: "Marina Ferry Terminal", phase: "phase2", cat: "civic", tag: "Transport", reqs: ["Ticket booth", "Waiting area / benches", "Dock with ferry spawn", "Departure board (bilingual)", "RTA branding"] },
+  { id: 21, original: "MSpan", name: "Dubai Tram Station", phase: "phase1", cat: "civic", tag: "Transport", reqs: ["Platform with tram tracks", "Ticket gates", "Digital departure board", "RTA branding + Arabic/English signage", "Covered canopy"] },
+  { id: 22, original: "NHCTA", name: "RTA Tram Depot", phase: "phase3", cat: "civic", tag: "Transport", reqs: ["Tram maintenance bay", "Staff area", "Control room", "Exterior yard with tram vehicles"] },
+  { id: 23, original: "Residential", name: "Marina Residential Tower", phase: "phase1", cat: "residential", tag: "Housing", reqs: ["Lobby with concierge", "Elevator access to floors", "Multiple apartment units (interior)", "Parking basement access", "Pool / amenity deck"] },
+  { id: 24, original: "Mansion", name: "Penthouse / Sky Villa", phase: "phase2", cat: "residential", tag: "Housing", reqs: ["Private elevator access", "Open plan luxury interior", "Rooftop terrace", "Pool", "Helipad (optional)", "Garage with luxury vehicles"] },
+  { id: 25, original: "Stadium", name: "Dubai Marina Sports Club", phase: "phase3", cat: "commercial", tag: "Leisure", reqs: ["Main sports hall or court", "Changing rooms", "Reception / membership desk", "Exterior with branding"] },
+  { id: 26, original: "Beach", name: "JBR Beach", phase: "phase2", cat: "commercial", tag: "Leisure", reqs: ["Sandy beach terrain", "Beach chairs / umbrellas", "Lifeguard tower", "Beach cafe/kiosk", "Water entry point", "The Walk promenade connection"] },
+  { id: 27, original: "Playground", name: "Marina Community Park", phase: "phase3", cat: "commercial", tag: "Leisure", reqs: ["Benches and greenery", "Jogging path", "Small fountain or feature", "Adjacent to residential"] },
+  { id: 28, original: "Lighthouse", name: "Marina Breakwater Lighthouse", phase: "phase3", cat: "civic", tag: "Landmark", reqs: ["Tall lighthouse structure", "Interior staircase (climbable)", "Ocean-facing on breakwater", "Ambient lighting at night"] },
+  { id: 29, original: "FireTower", name: "Civil Defence Watchtower", phase: "phase3", cat: "civic", tag: "Emergency", reqs: ["Tall observation tower", "Ladder or staircase access", "View over Marina map", "Civil Defence branding"] },
+  { id: 30, original: "Outside", name: "Sheikh Zayed Road / Marina Drive", phase: "phase1", cat: "civic", tag: "Infrastructure", reqs: ["Multi-lane road with medians", "Street lighting", "Road markings (Arabic directions)", "Pedestrian crossings", "Palm tree lining"] },
+  { id: 31, original: "Sewer", name: "Marina Drainage Tunnels", phase: "phase2", cat: "underground", tag: "Underground", reqs: ["Underground entrance (manhole or staircase)", "Tunnel network connecting 2–3 points on map", "Ambient lighting", "Used for illegal activity / escape routes"] },
+  { id: 32, original: "Asian", name: "Deira Street Food — The Walk", phase: "phase2", cat: "commercial", tag: "Food", reqs: ["Open air stalls", "Multiple food vendors", "Seating area", "Multicultural crowd feel"] },
+  { id: 33, original: "McDoogle", name: "Al Baik / Hardee's", phase: "phase1", cat: "commercial", tag: "Food", reqs: ["Counter with menu board", "Seating area (8–10 tables)", "Drive-through window (exterior)", "Al Baik red branding"] },
+  { id: 34, original: "BurgerShop", name: "Five Guys / Shake Shack", phase: "phase2", cat: "commercial", tag: "Food", reqs: ["Open kitchen counter", "Casual seating", "Modern interior fit-out"] },
+  { id: 35, original: "Restaurant", name: "Emirati Restaurant — The Walk", phase: "phase2", cat: "commercial", tag: "Food", reqs: ["Majlis-style seating area", "Open kitchen or display counter", "Arabic menu board", "Traditional decor elements"] },
+  { id: 36, original: "DosensDoughnuts", name: "Krispy Kreme", phase: "phase2", cat: "commercial", tag: "Food", reqs: ["Display counter with donuts", "Seating (6 tables)", "Krispy Kreme red/white branding", "Drive-through optional"] },
+  { id: 37, original: "Store", name: "Carrefour Express", phase: "phase1", cat: "commercial", tag: "Retail", reqs: ["Shelves with purchasable items", "Checkout counter", "Carrefour branding", "Small footprint — convenience store size"] },
+  { id: 38, original: "DDStore", name: "Spinneys Marina", phase: "phase2", cat: "commercial", tag: "Retail", reqs: ["Larger floor plan than Carrefour", "Multiple aisles", "Checkout lanes (2)", "Spinneys branding"] },
+  { id: 39, original: "Barbers", name: "Gents Salon — The Walk", phase: "phase2", cat: "commercial", tag: "Services", reqs: ["Barber chairs (3–4)", "Mirror wall", "Waiting bench", "Arabic + English signage"] },
+  { id: 40, original: "Vetements", name: "Luxury Boutique — Marina Mall", phase: "phase3", cat: "commercial", tag: "Retail", reqs: ["High-end interior fit-out", "Display mannequins", "Changing rooms", "Minimal branding — fictional luxury label"] },
+  { id: 41, original: "DoctorStereo", name: "Electronics Store — Marina Mall", phase: "phase3", cat: "commercial", tag: "Retail", reqs: ["Display tables with devices", "Counter service area", "Clean modern interior"] },
+  { id: 42, original: "VoltNightclub", name: "Rooftop Lounge / Members Club", phase: "phase2", cat: "commercial", tag: "Nightlife", reqs: ["Rooftop setting (top of a tower)", "Bar counter", "Seating booths", "DJ booth", "Night lighting atmosphere", "Bouncer NPC at entrance"] },
+  { id: 43, original: "IrishPub", name: "Hotel Bar — Grosvenor House", phase: "phase3", cat: "commercial", tag: "Nightlife", reqs: ["Bar counter (fully stocked)", "Pub seating", "Inside hotel lobby or attached", "Licensed venue signage"] },
+  { id: 44, original: "Shamrock", name: "JBR Licensed Pub", phase: "phase3", cat: "commercial", tag: "Nightlife", reqs: ["Bar area", "Outdoor terrace seating", "JBR Walk frontage", "Casual interior"] },
+  { id: 45, original: "ColonelsClub", name: "Wasta Elite Members Club", phase: "phase3", cat: "commercial", tag: "Nightlife", reqs: ["Private entrance — not street level", "Exclusive lounge interior", "VIP booths", "Members-only interaction mechanic"] },
+  { id: 46, original: "Aces", name: "Marina Motorsport Club", phase: "phase3", cat: "commercial", tag: "Leisure", reqs: ["Showroom floor with vehicles", "Small track or test area outside", "Lounge for members", "Vehicle purchase/customization interaction"] },
+  { id: 47, original: "LanderWok", name: "Pan-Asian Restaurant — Marina Mall", phase: "phase2", cat: "commercial", tag: "Food", reqs: ["Dining area (10–12 tables)", "Open kitchen", "Asian-themed interior", "Mall frontage"] },
+];
+
+const catColors = {
+  civic:       { bg: 'var(--civic-bg)',       color: 'var(--civic-color)' },
+  commercial:  { bg: 'var(--commercial-bg)',  color: 'var(--commercial-color)' },
+  residential: { bg: 'var(--residential-bg)', color: 'var(--residential-color)' },
+  underground: { bg: 'var(--underground-bg)', color: 'var(--underground-color)' },
+};
+
+const phaseLabels = {
+  phase1: { label: 'Phase 1 — core (get to playable)', bg: 'var(--phase1-bg)', color: 'var(--phase1-color)' },
+  phase2: { label: 'Phase 2 — economy & world',        bg: 'var(--phase2-bg)', color: 'var(--phase2-color)' },
+  phase3: { label: 'Phase 3 — full world completion',  bg: 'var(--phase3-bg)', color: 'var(--phase3-color)' },
+};
+
+// State
+const done = new Set();
+let currentFilter = 'all';
+
+function toggleDone(id, e) {
+  e.stopPropagation();
+  if (done.has(id)) done.delete(id);
+  else done.add(id);
+  updateProgress();
+  renderCards(currentFilter, true);
+}
+
+function toggleCard(id, e) {
+  e.stopPropagation();
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('expanded');
+  card.querySelector('.expand-icon').textContent = card.classList.contains('expanded') ? '▲' : '▼';
+}
+
+function updateProgress() {
+  const count = done.size;
+  document.getElementById('done-count').textContent = count;
+  document.getElementById('progress-fill').style.width = (count / 47 * 100) + '%';
+  document.getElementById('progress-label').textContent = count + ' / 47';
+}
+
+function filterCards(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards(filter);
+}
+
+function renderCards(filter, preserveExpanded) {
+  const container = document.getElementById('cards-container');
+
+  // Save expanded state
+  const expanded = new Set();
+  if (preserveExpanded) {
+    document.querySelectorAll('.card.expanded').forEach(c => expanded.add(parseInt(c.id.replace('card-', ''))));
+  }
+
+  let html = '';
+
+  if (filter === 'done') {
+    const doneLocs = locations.filter(l => done.has(l.id));
+    if (!doneLocs.length) {
+      html = '<div class="empty">No completed locations yet — click ✓ on a card to mark it done.</div>';
+    } else {
+      html += `<div class="tier"><div class="tier-header"><span class="tier-badge" style="background:var(--done-bg);color:var(--residential-color)">Completed</span><span class="tier-subtitle">${doneLocs.length} locations</span></div><div class="grid">`;
+      doneLocs.forEach(loc => { html += buildCard(loc, expanded); });
+      html += '</div></div>';
+    }
+    container.innerHTML = html;
+    return;
+  }
+
+  const filterPhases = (['phase1','phase2','phase3'].includes(filter)) ? [filter] : ['phase1','phase2','phase3'];
+  filterPhases.forEach(phase => {
+    let filtered = locations.filter(l => {
+      if (filter === 'all') return l.phase === phase;
+      if (['phase1','phase2','phase3'].includes(filter)) return l.phase === phase;
+      return l.phase === phase && l.cat === filter;
+    });
+    if (!filtered.length) return;
+    const pl = phaseLabels[phase];
+    html += `<div class="tier"><div class="tier-header"><span class="tier-badge" style="background:${pl.bg};color:${pl.color}">${pl.label}</span><span class="tier-subtitle">${filtered.length} locations</span></div><div class="grid">`;
+    filtered.forEach(loc => { html += buildCard(loc, expanded); });
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+function buildCard(loc, expanded) {
+  const cc = catColors[loc.cat] || catColors.commercial;
+  const isDone = done.has(loc.id);
+  const isExpanded = expanded && expanded.has(loc.id);
+  return `<div class="card${isDone ? ' done' : ''}${isExpanded ? ' expanded' : ''}" id="card-${loc.id}" onclick="toggleCard(${loc.id}, event)">
+    <div class="card-top">
+      <div class="card-names">
+        <div class="card-original">${loc.original}</div>
+        <div class="card-name">${loc.name}</div>
+        <span class="card-tag" style="background:${cc.bg};color:${cc.color}">${loc.tag}</span>
+      </div>
+      <div class="card-controls">
+        <button class="done-toggle" onclick="toggleDone(${loc.id}, event)" title="Mark complete">✓</button>
+        <span class="expand-icon">${isExpanded ? '▲' : '▼'}</span>
+      </div>
+    </div>
+    <div class="card-details"><ul class="req-list">${loc.reqs.map(r=>`<li>${r}</li>`).join('')}</ul></div>
+  </div>`;
+}
+
+renderCards('all');
+</script>
+</body>
+</html>
